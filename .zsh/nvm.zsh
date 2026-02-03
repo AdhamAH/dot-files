@@ -12,14 +12,21 @@ fi
 if [ -n "$_nvm_sh" ]; then
   _nvm_root="${_nvm_sh%/nvm.sh}"
   [ -s "$_nvm_root/etc/bash_completion.d/nvm" ] && . "$_nvm_root/etc/bash_completion.d/nvm"
-  # Expand the path now so aliases don't depend on _nvm_sh after it's unset.
-  alias nvm="unalias nvm node npm && . \"$_nvm_sh\" && nvm"
-  alias node="unalias nvm node npm && . \"$_nvm_sh\" && node"
-  alias npm="unalias nvm node npm && . \"$_nvm_sh\" && npm"
+
+  _nvm_load() {
+    unfunction nvm node npm 2>/dev/null
+    unalias nvm node npm 2>/dev/null
+    . "$_nvm_sh"
+  }
+
+  nvm() { _nvm_load; nvm "$@"; }
+  node() { _nvm_load; node "$@"; }
+  npm() { _nvm_load; npm "$@"; }
 
   # Ensure a default Node is available on new shells.
   # Set NVM_LAZY_LOAD=1 to keep lazy loading behavior.
   if [[ -o interactive ]] && [[ -z "${NVM_LAZY_LOAD:-}" ]]; then
+    unalias nvm node npm 2>/dev/null
     . "$_nvm_sh"
     nvm use --silent default >/dev/null 2>&1 || true
   fi
