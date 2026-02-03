@@ -3,17 +3,10 @@
 # Only run in interactive shells
 [[ -o interactive ]] || return
 
-# Powerlevel10k instant prompt and direnv integration
-if (( ${+commands[direnv]} )); then
-  emulate zsh -c "$(direnv export zsh)"
-fi
-
-if [[ -r "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh" ]]; then
+# Powerlevel10k instant prompt (disable by default to avoid partial loads)
+P10K_INSTANT_PROMPT=${P10K_INSTANT_PROMPT:-0}
+if [[ "$P10K_INSTANT_PROMPT" == "1" ]] && [[ -r "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh" ]]; then
   source "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh"
-fi
-
-if (( ${+commands[direnv]} )); then
-  emulate zsh -c "$(direnv hook zsh)"
 fi
 
 # Helper
@@ -49,6 +42,11 @@ source_if_exists "$HOME/.zsh/nvm.zsh"
 source_if_exists "$HOME/.zsh/wsl2fix.zsh"
 source_if_exists "$HOME/.zsh/goto.zsh"
 source_if_exists "$HOME/.zsh/local.zsh"
+
+# direnv
+if (( ${+commands[direnv]} )); then
+  eval "$(direnv hook zsh)"
+fi
 
 # zoxide
 command -v zoxide >/dev/null 2>&1 && eval "$(zoxide init zsh)"

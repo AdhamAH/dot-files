@@ -16,5 +16,12 @@ if [ -n "$_nvm_sh" ]; then
   alias nvm="unalias nvm node npm && . \"$_nvm_sh\" && nvm"
   alias node="unalias nvm node npm && . \"$_nvm_sh\" && node"
   alias npm="unalias nvm node npm && . \"$_nvm_sh\" && npm"
+
+  # Ensure a default Node is available on new shells.
+  # Set NVM_LAZY_LOAD=1 to keep lazy loading behavior.
+  if [[ -o interactive ]] && [[ -z "${NVM_LAZY_LOAD:-}" ]]; then
+    . "$_nvm_sh"
+    nvm use --silent default >/dev/null 2>&1 || true
+  fi
 fi
 unset _nvm_sh _nvm_root _brew_nvm
