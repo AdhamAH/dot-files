@@ -1,0 +1,91 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+log() {
+  printf '%s\n' "$*"
+}
+
+need_sudo() {
+  if [[ ${EUID:-0} -ne 0 ]] && command -v sudo >/dev/null 2>&1; then
+    echo "sudo"
+  else
+    echo ""
+  fi
+}
+
+clone_or_update() {
+  local repo="$1"
+  local dest="$2"
+
+  if [[ -d "$dest/.git" ]]; then
+    git -C "$dest" pull --ff-only
+  elif [[ ! -d "$dest" ]]; then
+    git clone --depth=1 "$repo" "$dest"
+  fi
+}
+
+install_brew() {
+  local pkgs=(git zsh curl wget fzf direnv zoxide eza bat ripgrep fd)
+  brew update
+  brew install "${pkgs[@]}"
+}
+
+install_apt() {
+  local sudo_cmd
+  sudo_cmd="$(need_sudo)"
+  local pkgs=(git zsh curl wget fzf direnv)
+  local extras=(zoxide eza bat ripgrep fd)
+
+  $sudo_cmd apt-get update
+  $sudo_cmd apt-get install -y "${pkgs[@]}"
+
+  for pkg in "${extras[@]}"; do
+    $sudo_cmd apt-get install -y "$pkg" || true
+  done
+}
+
+install_pacman() {
+  local sudo_cmd
+  sudo_cmd="$(need_sudo)"
+  local pkgs=(git zsh curl wget fzf direnv zoxide eza bat ripgrep fd)
+
+  $sudo_cmd pacman -Sy --noconfirm "${pkgs[@]}"
+}
+
+install_packages() {
+  if command -v brew >/dev/null 2>&1; then
+    install_brew
+  elif command -v apt-get >/dev/null 2>&1; then
+    install_apt
+  elif command -v pacman >/dev/null 2>&1; then
+    install_pacman
+  else
+    log "No supported package manager found (brew/apt/pacman). Skipping package installs."
+  fi
+}
+
+install_zsh_plugins() {
+  mkdir -p "$HOME/.zsh/plugins"
+
+  clone_or_update https://github.com/romkatv/powerlevel10k.git \
+    "$HOME/.zsh/powerlevel10k"
+
+  clone_or_update https://github.com/zsh-users/zsh-autosuggestions \
+    "$HOME/.zsh/plugins/zsh-autosuggestions"
+  clone_or_update https://github.com/zsh-users/zsh-syntax-highlighting \
+    "$HOME/.zsh/plugins/zsh-syntax-highlighting"
+  clone_or_update https://github.com/zsh-users/zsh-history-substring-search \
+    "$HOME/.zsh/plugins/zsh-history-substring-search"
+  clone_or_update https://github.com/MichaelAquilina/zsh-you-should-use \
+    "$HOME/.zsh/plugins/zsh-you-should-use"
+  clone_or_update https://github.com/fdellwing/zsh-bat \
+    "$HOME/.zsh/plugins/zsh-bat"
+  clone_or_update https://github.com/marlonrichert/zsh-autocomplete \
+    "$HOME/.zsh/plugins/zsh-autocomplete"
+}
+
+install_packages
+install_zsh_plugins
+
+log "Done."
+log "Next: install a Nerd Font (MesloLGS NF) and run 'p10k configure' if you want a custom prompt."

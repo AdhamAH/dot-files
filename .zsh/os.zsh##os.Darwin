@@ -1,0 +1,22 @@
+# macOS-specific setup
+
+if [ -x /opt/homebrew/bin/brew ]; then
+  eval "$(/opt/homebrew/bin/brew shellenv)"
+elif [ -x /usr/local/bin/brew ]; then
+  eval "$(/usr/local/bin/brew shellenv)"
+fi
+
+if command -v brew >/dev/null 2>&1; then
+  HOMEBREW_PREFIX="$(brew --prefix)"
+  fpath=("$HOMEBREW_PREFIX/share/zsh-completions" $fpath)
+fi
+
+# macOS-specific paths
+path_append "$HOME/.cache/lm-studio/bin"
+path_append "$HOME/.codeium/windsurf/bin"
+path_append "$HOME/.antigravity/antigravity/bin"
+path_append "$HOME/.opencode/bin"
+path_append "/usr/local/mysql/bin"
+path_append "/opt/homebrew/share/flutter/bin"
+path_append "/opt/homebrew/opt/php@8.2/bin"
+path_append "/opt/homebrew/opt/php@8.2/sbin"
