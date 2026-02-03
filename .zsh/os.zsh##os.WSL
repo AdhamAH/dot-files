@@ -8,3 +8,22 @@ command -v fix_wsl2_interop >/dev/null 2>&1 && fix_wsl2_interop
 
 # Prefer wslview for opening URLs (if installed)
 command -v wslview >/dev/null 2>&1 && export BROWSER="wslview"
+
+# Avoid using Windows Node/npm shims inside WSL
+_wsl_strip_windows_node_path() {
+  local p
+  local -a parts
+  parts=(${(s/:/)PATH})
+  PATH=""
+  for p in "${parts[@]}"; do
+    case "$p" in
+      /mnt/*/Users/*/AppData/Roaming/npm|/mnt/*/Program\ Files/nodejs|/mnt/*/Program\ Files\ \(x86\)/nodejs)
+        continue
+        ;;
+    esac
+    PATH="${PATH:+$PATH:}$p"
+  done
+  unset p parts
+}
+_wsl_strip_windows_node_path
+unset -f _wsl_strip_windows_node_path

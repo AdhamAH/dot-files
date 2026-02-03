@@ -28,6 +28,12 @@ install_brew() {
   local pkgs=(git zsh curl wget fzf direnv zoxide eza bat ripgrep fd)
   brew update
   brew install "${pkgs[@]}"
+
+  if [[ "$(uname -s)" == "Darwin" ]]; then
+    brew tap homebrew/cask-fonts || true
+    # Required for Powerlevel10k icons
+    brew install --cask font-meslo-lg-nerd-font || true
+  fi
 }
 
 install_apt() {
@@ -70,7 +76,11 @@ install_packages() {
   elif command -v pacman >/dev/null 2>&1; then
     install_pacman
   else
-    log "No supported package manager found (brew/apt/pacman). Skipping package installs."
+    if [[ "$(uname -s)" == "Darwin" ]]; then
+      log "Homebrew not found. Install it from https://brew.sh and re-run yadm bootstrap."
+    else
+      log "No supported package manager found (brew/apt/pacman). Skipping package installs."
+    fi
   fi
 }
 
