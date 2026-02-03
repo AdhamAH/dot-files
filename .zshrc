@@ -51,8 +51,18 @@ fi
 # zoxide
 command -v zoxide >/dev/null 2>&1 && eval "$(zoxide init zsh)"
 
-# Powerlevel10k theme
-if [[ -r "$HOME/.zsh/powerlevel10k/powerlevel10k.zsh-theme" ]]; then
+# Powerlevel10k theme (with fallback for terminals that don't support it)
+# Use fallback if: SIMPLE_PROMPT=1, or terminal is dumb/unknown, or inside Claude Code
+_use_p10k=1
+[[ "$SIMPLE_PROMPT" == "1" ]] && _use_p10k=0
+[[ "$TERM" == "dumb" || -z "$TERM" ]] && _use_p10k=0
+[[ -n "$CLAUDE_CODE" || "$TERM_PROGRAM" == "claude-code" ]] && _use_p10k=0
+
+if (( _use_p10k )) && [[ -r "$HOME/.zsh/powerlevel10k/powerlevel10k.zsh-theme" ]]; then
   source "$HOME/.zsh/powerlevel10k/powerlevel10k.zsh-theme"
+  [[ -r "$HOME/.p10k.zsh" ]] && source "$HOME/.p10k.zsh"
+else
+  # Stylish fallback prompt for terminals without p10k
+  source_if_exists "$HOME/.zsh/fallback-prompt.zsh"
 fi
-[[ -r "$HOME/.p10k.zsh" ]] && source "$HOME/.p10k.zsh"
+unset _use_p10k
