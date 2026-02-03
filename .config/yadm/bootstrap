@@ -19,7 +19,9 @@ clone_or_update() {
 
   if [[ -d "$dest/.git" ]]; then
     git -C "$dest" pull --ff-only
-  elif [[ ! -d "$dest" ]]; then
+  else
+    # Remove empty or incomplete directory and clone fresh
+    rm -rf "$dest"
     git clone --depth=1 "$repo" "$dest"
   fi
 }
