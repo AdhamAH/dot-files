@@ -1,4 +1,0 @@
-# Arch-specific setup
-
-# Ensure common site functions are available
-fpath=("/usr/share/zsh/site-functions" $fpath)
