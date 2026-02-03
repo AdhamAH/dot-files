@@ -1,0 +1,1 @@
+os.zsh##os.WSL

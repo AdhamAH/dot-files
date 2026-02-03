@@ -34,7 +34,7 @@ install_apt() {
   local sudo_cmd
   sudo_cmd="$(need_sudo)"
   local pkgs=(git zsh curl wget fzf direnv)
-  local extras=(zoxide eza bat ripgrep fd)
+  local extras=(zoxide eza bat ripgrep fd-find)
 
   $sudo_cmd apt-get update
   $sudo_cmd apt-get install -y "${pkgs[@]}"
@@ -42,6 +42,16 @@ install_apt() {
   for pkg in "${extras[@]}"; do
     $sudo_cmd apt-get install -y "$pkg" || true
   done
+
+  # Normalize command names on Ubuntu/Debian
+  if command -v fdfind >/dev/null 2>&1 && ! command -v fd >/dev/null 2>&1; then
+    mkdir -p "$HOME/.local/bin"
+    ln -sf "$(command -v fdfind)" "$HOME/.local/bin/fd"
+  fi
+  if command -v batcat >/dev/null 2>&1 && ! command -v bat >/dev/null 2>&1; then
+    mkdir -p "$HOME/.local/bin"
+    ln -sf "$(command -v batcat)" "$HOME/.local/bin/bat"
+  fi
 }
 
 install_pacman() {
