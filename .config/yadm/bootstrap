@@ -68,6 +68,13 @@ install_pacman() {
   $sudo_cmd pacman -Sy --noconfirm "${pkgs[@]}"
 }
 
+remove_oh_my_zsh() {
+  if [[ -d "$HOME/.oh-my-zsh" ]]; then
+    log "Removing Oh My Zsh..."
+    rm -rf "$HOME/.oh-my-zsh"
+  fi
+}
+
 install_packages() {
   if command -v brew >/dev/null 2>&1; then
     install_brew
@@ -104,6 +111,7 @@ install_zsh_plugins() {
     "$HOME/.zsh/plugins/zsh-autocomplete"
 }
 
+remove_oh_my_zsh
 install_packages
 install_zsh_plugins
 
